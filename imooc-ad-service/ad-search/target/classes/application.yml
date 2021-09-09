@@ -1,10 +1,11 @@
 server:
+  port: 7001
   servlet:
-    context-path: /ad-sponsor
-  port: 7000
+    context-path: /ad-search
+
 spring:
   application:
-    name: eureka-client-ad-sponsor
+    name: eureka-client-ad-search
   jpa:
     show-sql: true
     hibernate:
@@ -20,7 +21,18 @@ spring:
       max-active: 4
       min-idle: 2
       initial-size: 2
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8000/eureka/
+
+feign:
+  hystrix:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
