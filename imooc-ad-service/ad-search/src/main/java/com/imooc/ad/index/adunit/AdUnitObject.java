@@ -1,5 +1,6 @@
-package com.imooc.ad.index.adplan;
+package com.imooc.ad.index.adunit;
 
+import com.imooc.ad.index.adplan.AdPlanObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.imooc.ad.index.adplan;
+package com.imooc.ad.index.adunit;
 
 import com.imooc.ad.index.IndexAware;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,14 @@ public class AdUnitIndex implements IndexAware<Long,AdUnitObject> {
 
     @Override
     public void update(Long key, AdUnitObject value) {
-
+        log.info("before add: {}",objectMap);
+        AdUnitObject oldObject = objectMap.get(key);
+        if (oldObject == null){
+            objectMap.put(key, value);
+        }else {
+            oldObject.update(value);
+        }
+        log.info("after add: {}",objectMap);
     }
 
     @Override
