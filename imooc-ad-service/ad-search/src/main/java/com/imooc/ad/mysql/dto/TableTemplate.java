@@ -16,6 +16,9 @@ public class TableTemplate {
     private String tableName;
     private String level;
 
+    /**
+     * 所对应的操作类型对应的各个列
+     */
     private Map<OpType, List<String>> opTypeFieldSetMap = new HashMap<>();
     /**
      * 字段索引 -> 字段名
