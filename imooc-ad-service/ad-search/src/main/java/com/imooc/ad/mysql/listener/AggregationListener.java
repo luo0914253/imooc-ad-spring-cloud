@@ -4,15 +4,13 @@ import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.*;
 import com.imooc.ad.mysql.TemplateHolder;
 import com.imooc.ad.mysql.dto.BinlogRowData;
+import com.imooc.ad.mysql.dto.TableTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -82,6 +80,29 @@ public class AggregationListener implements BinaryLogClient.EventListener {
         return Collections.emptyList();
     }
     private BinlogRowData buildRowData(EventData eventData){
-        return null;
+//      TODO debug 好迷
+        TableTemplate table = templateHolder.getTable(tableName);
+        if (table == null){
+            return null;
+        }
+        List<Map<String,String>> afterMapList = new ArrayList<>();
+        for (Serializable[] after : getAfterValues(eventData)) {
+            Map<String,String> afterMap = new HashMap<>();
+            int colLen = after.length;
+            for (int ix = 0;ix <colLen;++ix){
+//              取出当前位置对应的列名
+                String colName = table.getPosMap().get(ix);
+                if (colName == null){
+                    continue;
+                }
+                String colValue = after[ix].toString();
+                afterMap.put(colName,colValue);
+            }
+            afterMapList.add(afterMap);
+        }
+        BinlogRowData rowData = new BinlogRowData();
+        rowData.setAfter(afterMapList);
+        rowData.setTable(table);
+        return rowData;
     }
 }
