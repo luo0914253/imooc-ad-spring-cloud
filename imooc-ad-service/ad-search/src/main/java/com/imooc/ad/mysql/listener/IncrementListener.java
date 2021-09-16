@@ -19,7 +19,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class IncrementListener implements Ilistener {
-    @Resource(name = "")
+    @Resource(name = "indexSender")
     private ISender sender;
 
     private final AggregationListener aggregationListener;

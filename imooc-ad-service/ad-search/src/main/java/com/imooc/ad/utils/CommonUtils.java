@@ -1,5 +1,12 @@
 package com.imooc.ad.utils;
 
+import org.apache.commons.lang.time.DateUtils;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -23,5 +30,13 @@ public class CommonUtils {
         }
         result.deleteCharAt(result.length()-1);
         return result.toString();
+    }
+    public static Date parseStringDate(String dateString){
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyy", Locale.US);
+            return DateUtils.addHours(dateFormat.parse(dateString),-8);
+        }catch (ParseException e){
+            return null;
+        }
     }
 }
