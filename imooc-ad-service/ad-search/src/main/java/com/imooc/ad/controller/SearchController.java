@@ -5,6 +5,9 @@ import com.imooc.ad.IgnoreResponseAdvice;
 import com.imooc.ad.client.SponsorClient;
 import com.imooc.ad.client.vo.AdPlan;
 import com.imooc.ad.client.vo.AdPlanGetRequest;
+import com.imooc.ad.search.ISearch;
+import com.imooc.ad.search.vo.SearchRequest;
+import com.imooc.ad.search.vo.SearchResponse;
 import com.imooc.ad.vo.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,10 +23,16 @@ public class SearchController {
 
     private final RestTemplate restTemplate;
     private final SponsorClient sponsorClient;
+    private final ISearch search;
 
-    public SearchController(RestTemplate restTemplate, SponsorClient sponsorClient) {
+    public SearchController(RestTemplate restTemplate, SponsorClient sponsorClient, ISearch search) {
         this.restTemplate = restTemplate;
         this.sponsorClient = sponsorClient;
+        this.search = search;
+    }
+    @PostMapping("/fetchAds")
+    public SearchResponse fetchAds(@RequestBody SearchRequest request){
+        return search.fetchAds(request);
     }
     @SuppressWarnings("all")
     @IgnoreResponseAdvice

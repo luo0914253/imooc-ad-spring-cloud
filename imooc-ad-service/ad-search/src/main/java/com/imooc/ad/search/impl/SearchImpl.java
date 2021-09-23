@@ -1,7 +1,12 @@
 package com.imooc.ad.search.impl;
 
+import com.imooc.ad.index.CommonStatus;
 import com.imooc.ad.index.DataTable;
 import com.imooc.ad.index.adunit.AdUnitIndex;
+import com.imooc.ad.index.adunit.AdUnitObject;
+import com.imooc.ad.index.creative.CreativeIndex;
+import com.imooc.ad.index.creative.CreativeObject;
+import com.imooc.ad.index.creativeunit.CreativeUnitIndex;
 import com.imooc.ad.index.district.UnitDistrictIndex;
 import com.imooc.ad.index.interest.UnitItIndex;
 import com.imooc.ad.index.keyword.UnitKeywordIndex;
@@ -13,6 +18,7 @@ import com.imooc.ad.search.vo.feature.FeatureRelation;
 import com.imooc.ad.search.vo.feature.ItFeature;
 import com.imooc.ad.search.vo.feature.KeywordFeature;
 import com.imooc.ad.search.vo.media.AdSlot;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -22,7 +28,11 @@ import java.util.*;
 @Slf4j
 @Service
 public class SearchImpl implements ISearch {
+    public SearchResponse fallback(SearchRequest request,Throwable e){
+        return null;
+    }
     @Override
+    @HystrixCommand(fallbackMethod = "fallback")
     public SearchResponse fetchAds(SearchRequest request) {
 //      TODO 越写越懵逼
         List<AdSlot> adSlots = request.getRequestInfo().getAdSlots();
@@ -45,8 +55,39 @@ public class SearchImpl implements ISearch {
             }else {
                 targetUnitIdSet = getORRelationUnitIds(adUnitIdSet,keywordFeature,districtFeature,itFeature);
             }
+            List<AdUnitObject> unitObjects = DataTable.of(AdUnitIndex.class).fetch(targetUnitIdSet);
+            filterAndUnitAndPlanStatus(unitObjects,CommonStatus.VALID);
+//          获取关联的创意的id
+            List<Long> adIds = DataTable.of(CreativeUnitIndex.class).selectAds(unitObjects);
+            List<CreativeObject> creatives = DataTable.of(CreativeIndex.class).fetch(adIds);
+//          通过AdSlot实现对CreativeObject的过滤、
+            filterCreativeByAdSlot(creatives,adSlot.getWidth(),adSlot.getHeight(),adSlot.getType());
+            adSlot2Ads.put(adSlot.getAdSlotCode(),buildCreativeResponse(creatives));
         }
-        return null;
+        return response;
+    }
+    private List<SearchResponse.Creative> buildCreativeResponse(List<CreativeObject> creatives){
+        if (CollectionUtils.isEmpty(creatives)){
+            return Collections.emptyList();
+        }
+        CreativeObject randomObject = creatives.get(Math.abs(new Random().nextInt()) % creatives.size());
+        return Collections.singletonList(SearchResponse.convert(randomObject));
+    }
+    private void filterCreativeByAdSlot(List<CreativeObject> creatives,Integer width,Integer height,List<Integer> type){
+        if (CollectionUtils.isEmpty(creatives)){
+            return;
+        }
+        CollectionUtils.filter(creatives,creative->creative.getAuditStatus().equals(CommonStatus.VALID.getStatus())
+                &&creative.getWidth().equals(width)
+                &&creative.getHeight().equals(height)
+                &&type.contains(creative.getType()));
+    }
+    private void filterAndUnitAndPlanStatus(List<AdUnitObject> unitObjects, CommonStatus status){
+        if (CollectionUtils.isEmpty(unitObjects)){
+            return;
+        }
+        CollectionUtils.filter(unitObjects,object->object.getUnitStatus().equals(status.getStatus())
+                &&object.getAdPlanObject().getPlanStatus().equals(status.getStatus()));
     }
     private Set<Long> getORRelationUnitIds(Set<Long> adUnitIdSet,KeywordFeature keywordFeature,DistrictFeature districtFeature,ItFeature itFeature){
 //      TODO 未写先懵逼

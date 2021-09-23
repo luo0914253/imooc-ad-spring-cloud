@@ -2,7 +2,7 @@ package com.imooc.ad.dump;
 
 public class DConstant {
 //  数据文件存储目录
-    public static final String DATA_ROOT_DIR = "H:/imooc_data/ad/mysql_data";
+    public static final String DATA_ROOT_DIR = "H:/imooc_data/ad/mysql_data/";
 
 //  各个数据表的存储文件名
     public static final String AD_PLAN = "ad_plan.data";

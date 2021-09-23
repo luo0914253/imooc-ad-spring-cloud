@@ -16,6 +16,7 @@ public class AdPlanIndex implements IndexAware<Long,AdPlanObject> {
     }
     @Override
     public AdPlanObject get(Long key) {
+        System.out.println(key);
         return objectMap.get(key);
     }
 
