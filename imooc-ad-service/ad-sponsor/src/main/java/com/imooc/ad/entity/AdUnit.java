@@ -45,8 +45,8 @@ public class AdUnit {
     private Date createTime;
 
     @Basic
-    @Column(name = "end_time",nullable = false)
-    private Date endTime;
+    @Column(name = "update_time",nullable = false)
+    private Date updateTime;
 
     public AdUnit(Long planId, String unitName, Integer positionType, Long budget) {
         this.planId = planId;
@@ -55,6 +55,6 @@ public class AdUnit {
         this.positionType = positionType;
         this.budget = budget;
         this.createTime = new Date();
-        this.endTime = this.createTime;
+        this.updateTime = this.createTime;
     }
 }
